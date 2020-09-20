@@ -1,11 +1,6 @@
 from controller import Controller
 import numpy as np
 
-# Neural Network Layers:
-# - input: 20
-# - hidden (1 or more): size not fixed
-# - output: 5
-
 
 def normalize_inputs(inputs):
     min_v = min(inputs)
@@ -25,11 +20,11 @@ class PlayerController(Controller):
     def __init__(self):
         pass
 
-    def control(self, inputs, nn):
+    def control(self, inputs, ffn):
         # prepare input
         inputs = normalize_inputs(inputs)
 
-        output = nn.feedforward(inputs)
+        output = ffn.activate(inputs)
 
         # return output
         return np.round(output).astype(int)

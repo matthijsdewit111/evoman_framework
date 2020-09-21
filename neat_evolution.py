@@ -4,22 +4,55 @@ import sys
 
 import neat
 import numpy as np
+import matplotlib.pyplot as plt
 
 import visualize
 
-global env
+plt.ion()
+
+counter = 0
+previous_fitness_max = 0.0
+previous_fitness_mean = 0.0
+previous_fitness_min = 0.0
+previous_fitness_std = 0.0
 
 
 def eval_genomes(genomes, config):
+    global counter, previous_fitness_mean, previous_fitness_std, previous_fitness_max, previous_fitness_min
+    counter += 1
+    fitnesses = []
     for genome_id, genome in genomes:
 
         print(genome.key, end="")
-        if genome_id % 10 == 0:
-            visualize.draw_net(config, genome, view=True)
+        # if counter % 10 == 0:
+        #     visualize.draw_net(config, genome, view=True)
 
         ffn = neat.nn.FeedForwardNetwork.create(genome, config)
         f, p, e, t = env.play(pcont=ffn)
         genome.fitness = f
+        fitnesses.append(f)
+
+    np_fitnesses = np.array(fitnesses)
+    fitness_mean = np_fitnesses.mean()
+    fitness_std = np_fitnesses.std()
+    fitness_max = np_fitnesses.max()
+    fitness_min = np_fitnesses.min()
+
+    x = [counter - 1, counter]
+
+    plt.plot(x, [previous_fitness_mean, fitness_mean], color='blue')
+    plt.fill_between(x,
+                     [previous_fitness_mean - previous_fitness_std, fitness_mean - fitness_std],
+                     [previous_fitness_mean + previous_fitness_std, fitness_mean + fitness_std],
+                     color='blue', alpha=0.5, linewidth=0.0)
+    plt.plot(x, [previous_fitness_max, fitness_max], color='green')
+    plt.plot(x, [previous_fitness_min, fitness_min], color='red')
+    plt.pause(0.1)
+
+    previous_fitness_mean = fitness_mean
+    previous_fitness_std = fitness_std
+    previous_fitness_min = fitness_min
+    previous_fitness_max = fitness_max
 
 
 if __name__ == "__main__":
@@ -33,7 +66,7 @@ if __name__ == "__main__":
 
     # initializes environment with ai player using random controller, playing against static enemy
     env = Environment(experiment_name=experiment_name,
-                      enemies=[7],
+                      enemies=[8],
                       playermode="ai",
                       player_controller=PlayerController(),
                       enemymode="static",

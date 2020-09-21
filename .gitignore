@@ -1,0 +1,8 @@
+.vscode/
+.idea/
+*__pycache__/*
+*.pyc
+Digraph.gv*
+*-checkpoint-*
+evoman_logs.txt
+*demo.py

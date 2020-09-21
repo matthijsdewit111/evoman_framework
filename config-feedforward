@@ -3,13 +3,22 @@
 [NEAT]
 fitness_criterion     = max
 fitness_threshold     = 99.9
-pop_size              = 30
+pop_size              = 100
 reset_on_extinction   = True
 
 [DefaultReproduction]
-elitism               = 2
+# min number to keep alive per species
+elitism               = 1
 survival_threshold    = 0.2
-min_species_size      = 2
+# min pop per species
+min_species_size      = 5
+
+[DefaultStagnation]
+species_fitness_func = max
+# kill species if no improvement for this many gens
+max_stagnation       = 10
+# min num of species
+species_elitism      = 5
 
 [DefaultGenome]
 feed_forward          = True
@@ -21,8 +30,10 @@ activation_options      = sigmoid
 
 # network parameters
 num_inputs            = 20
-num_hidden            = 1
+num_hidden            = 3
 num_outputs           = 5
+
+initial_connection    = partial_direct 0.1
 
 # node add/remove rates
 node_add_prob         = 0.2
@@ -74,8 +85,3 @@ response_replace_rate   = 0.0
 
 [DefaultSpeciesSet]
 compatibility_threshold = 3.0
-
-[DefaultStagnation]
-species_fitness_func = max
-max_stagnation       = 20
-species_elitism      = 2

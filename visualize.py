@@ -1,3 +1,5 @@
+# source: https://github.com/CodeReclaimers/neat-python/tree/master/examples/xor
+
 import copy
 import warnings
 

@@ -1,20 +1,26 @@
-import numpy as np
-import neat
-import visualize
-import sys
 import os
+import pickle
+import sys
+
+import neat
+import numpy as np
+
+import visualize
 
 global env
 
+
 def eval_genomes(genomes, config):
     for genome_id, genome in genomes:
-        
-        print(genome)
-        visualize.draw_net(config, genome, view=True)
+
+        print(genome.key, end="")
+        if genome_id % 10 == 0:
+            visualize.draw_net(config, genome, view=True)
 
         ffn = neat.nn.FeedForwardNetwork.create(genome, config)
         f, p, e, t = env.play(pcont=ffn)
         genome.fitness = f
+
 
 if __name__ == "__main__":
     sys.path.insert(0, 'evoman')
@@ -27,11 +33,10 @@ if __name__ == "__main__":
 
     # initializes environment with ai player using random controller, playing against static enemy
     env = Environment(experiment_name=experiment_name,
-                      enemies=[2],
+                      enemies=[7],
                       playermode="ai",
                       player_controller=PlayerController(),
                       enemymode="static",
-                      level=1,
                       speed="fastest")
 
     config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
@@ -45,5 +50,16 @@ if __name__ == "__main__":
     p.add_reporter(neat.Checkpointer(5))
 
     winner = p.run(eval_genomes, 300)
+    pickle.dump(winner, open('neat-winner', 'wb'))
 
     print('\nBest genome:\n{!s}'.format(winner))
+
+    visualize.draw_net(config, winner, view=True)
+
+    while True:
+        input("Press Enter to watch it play...")
+
+        env.speed = "normal"
+
+        ffn = neat.nn.FeedForwardNetwork.create(winner, config)
+        env.play(pcont=ffn)

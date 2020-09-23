@@ -55,7 +55,7 @@ if __name__ == "__main__":
     from environment import Environment
     from neat_evolution_controller import PlayerController
 
-    experiment_name = 'neat_evolution'
+    experiment_name = 'neuro_evolution'
     if not os.path.exists(experiment_name):
         os.makedirs(experiment_name)
 
@@ -64,7 +64,7 @@ if __name__ == "__main__":
 
     config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
                          neat.DefaultSpeciesSet, neat.DefaultStagnation,
-                         'config-feedforward-neat')
+                         'config-feedforward-neuro')
 
     for e in enemies:
         enemy = e
@@ -81,15 +81,15 @@ if __name__ == "__main__":
             p.add_reporter(neat.StdOutReporter(True))
             stats = neat.StatisticsReporter()
             p.add_reporter(stats)
-            p.add_reporter(neat.Checkpointer(generation_interval=5, filename_prefix='neat-checkpoint-e{}-r{}'.format(e, r)))
+            p.add_reporter(neat.Checkpointer(generation_interval=5, filename_prefix='neuro-checkpoint-e{}-r{}'.format(e, r)))
 
             winner = p.run(eval_genomes, 25)
-            pickle.dump(winner, open('neat-winner-r{}-e{}-{}'.format(r, e, round(winner.fitness, 3)), 'wb'))
+            pickle.dump(winner, open('neuro-winner-r{}-e{}-{}'.format(r, e, round(winner.fitness, 3)), 'wb'))
 
             # print('\nBest genome:\n{!s}'.format(winner))
             # visualize.draw_net(config, winner, view=True)
 
-    df.to_csv('neat-results.csv', index=False)
+    df.to_csv('neuro-results.csv', index=False)
     # while True:
     #     input("Press Enter to watch it play...")
 

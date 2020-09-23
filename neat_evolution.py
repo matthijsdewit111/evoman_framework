@@ -81,7 +81,7 @@ if __name__ == "__main__":
             p.add_reporter(neat.StdOutReporter(True))
             stats = neat.StatisticsReporter()
             p.add_reporter(stats)
-            p.add_reporter(neat.Checkpointer(generation_interval=5, filename_prefix='neat-checkpoint-e{}-r{}'.format(e, r)))
+            p.add_reporter(neat.Checkpointer(generation_interval=5, filename_prefix='checkpoints/neat-checkpoint-e{}-r{}'.format(e, r)))
 
             winner = p.run(eval_genomes, 25)
             pickle.dump(winner, open('neat-winner-r{}-e{}-{}'.format(r, e, round(winner.fitness, 3)), 'wb'))

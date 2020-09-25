@@ -55,8 +55,13 @@ if __name__ == "__main__":
                     'fitness': f
                 }, ignore_index=True)
 
-    sns.boxplot(data=df, x='enemy', y='fitness', hue='EA')
+    sns.boxplot(data=df, x='enemy', y='fitness', hue='EA').set_title('performance of best')
     sns.despine(offset=10, trim=True)
-    sns.set(title='performance of best')
-    plt.plot()
+
+    df['enemy'] = [-0.2] * 5 + [0.8] * 5 + [1.8] * 5 + [0.2] * 5 + [1.2] * 5 + [2.2] * 5
+    ax = sns.scatterplot(data=df, x='enemy', y='fitness', hue='EA', s=100)
+
+    handles, labels = ax.get_legend_handles_labels()
+    ax.legend(handles=handles[:-2], labels=labels[:-2])
+
     plt.show()

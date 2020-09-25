@@ -84,4 +84,4 @@ response_mutate_rate    = 0.0
 response_replace_rate   = 0.0
 
 [DefaultSpeciesSet]
-compatibility_threshold = 3.0
+compatibility_threshold = 3.5

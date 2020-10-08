@@ -9,11 +9,13 @@ import seaborn as sns
 
 import visualize
 
+os.environ["SDL_VIDEODRIVER"] = "dummy"
+
 # global vars
-df = pd.DataFrame(columns=['value', 'metric', 'gen', 'run', 'enemy'])
+df = pd.DataFrame(columns=['value', 'metric', 'gen', 'run', 'enemy_group'])
 run_counter = 0
 gen_counter = 0
-enemy = 0
+enemy_group = 0
 
 
 def eval_genomes(genomes, config):
@@ -38,13 +40,13 @@ def eval_genomes(genomes, config):
                      'metric': 'max',
                      'gen': gen_counter,
                      'run': run_counter,
-                     'enemy': enemy
+                     'enemy_group': enemy_group
                      },
                     {'value': mean_fitness,
                      'metric': 'mean',
                      'gen': gen_counter,
                      'run': run_counter,
-                     'enemy': enemy
+                     'enemy_group': enemy_group
                      }], ignore_index=True)
 
     gen_counter += 1
@@ -59,18 +61,19 @@ if __name__ == "__main__":
     if not os.path.exists(experiment_name):
         os.makedirs(experiment_name)
 
-    enemies = [2, 7, 8]
+    enemy_groups = [[1,2,4,7], [3,6,7,8]]
     num_runs = 10
 
     config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
                          neat.DefaultSpeciesSet, neat.DefaultStagnation,
                          'config-feedforward-neat')
 
-    for e in enemies:
-        enemy = e
+    for e, enemies in enumerate(enemy_groups):
+        enemy_group = e
 
         env = Environment(experiment_name=experiment_name,
-                          enemies=[e],
+                          enemies=enemies,
+                          multiplemode='yes',
                           player_controller=PlayerController())
 
         for r in range(num_runs):
@@ -84,16 +87,6 @@ if __name__ == "__main__":
             p.add_reporter(neat.Checkpointer(generation_interval=5, filename_prefix='checkpoints/neat-checkpoint-e{}-r{}'.format(e, r)))
 
             winner = p.run(eval_genomes, 25)
-            pickle.dump(winner, open('neat-winner-r{}-e{}-{}'.format(r, e, round(winner.fitness, 3)), 'wb'))
-
-            # print('\nBest genome:\n{!s}'.format(winner))
-            # visualize.draw_net(config, winner, view=True)
+            pickle.dump(winner, open('winners/neat-winner-e{}-r{}'.format(e, r), 'wb'))
 
     df.to_csv('neat-results.csv', index=False)
-    # while True:
-    #     input("Press Enter to watch it play...")
-
-    #     env.speed = "normal"
-
-    #     ffn = neat.nn.FeedForwardNetwork.create(winner, config)
-    #     env.play(pcont=ffn)

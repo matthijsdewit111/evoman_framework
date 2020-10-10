@@ -112,8 +112,8 @@ if __name__ == "__main__":
 
             population = init_population(population_size, 20, 5, num_hidden_nodes, initial_species)
             num_species = initial_species
-            stagnation_array = [[0, 0]] * num_species # [stagnation counter, max_fitness]
-            winner = [None, 0] # [geneome, fitness]
+            stagnation_array = [[0, -99] for _ in range(num_species)] # [stagnation counter, max_fitness]
+            winner = [None, 0] # [genome, fitness]
 
             # evaluate all individuals
             for g in range(max_generations):
@@ -146,35 +146,30 @@ if __name__ == "__main__":
                     elites.append(species_elites)
                     
                     # determine parents which will create children
-                    num_survivors = int(len(sub_population) * survival_rate)
+                    num_survivors = max(int(len(sub_population) * survival_rate), min_species_size)
                     num_children = len(sub_population) - num_elites
                     species_parents = [sub_population[result["individual_index"]]
                             for result in sorted_results[:num_survivors]]
                     parents.append(species_parents)
 
-                max_fitness = 0
+                max_fitness = max(max_fitnesses)
                 sum_fitnesses = 0
                 for i in range(num_species):
-                    species_max_fitness = 0
                     sum_species_fitness = 0
                     for j in range(len(population[i])):
                         fitness = generation_results[i][j]["fitness"]
-                        if fitness > max_fitness:
-                            max_fitness = fitness
-                        if fitness > species_max_fitness:
-                            species_max_fitness = fitness
                         sum_fitnesses += fitness
                         sum_species_fitness += fitness
                     
-                    print("species {}: max fit {}, mean fit {}, stagnation {}".format(species_max_fitness, sum_species_fitness / len(population), stagnation_array[i]))
+                    print("species {}: max fit {}, mean fit {}, stag {},{}".format(i, max_fitnesses[i], sum_species_fitness / len(population[i]), stagnation_array[i][0], stagnation_array[i][1]))
 
                 mean_fitness = sum_fitnesses / sum([len(sp) for sp in population])
                 print("overal: max fit: {}, mean fit {}".format(max_fitness, mean_fitness))
 
                 df = df.append([{'value': max_fitness,
                                 'metric': 'max',
-                                'gen': gen_counter,
-                                'run': run_counter,
+                                'gen': g,
+                                'run': r,
                                 'enemy': e
                                 },
                                 {'value': mean_fitness,
@@ -186,21 +181,21 @@ if __name__ == "__main__":
                 
                 # keep track of stagnation
                 stagnated_species = []
-                for i in range(num_species):
+                population_lost = 0
+                for i in range(len(population)):
                     if stagnation_array[i][1] < max_fitnesses[i]:
                        stagnation_array[i][1] = max_fitnesses[i]
                        stagnation_array[i][0] = 0
                     else:
                         stagnation_array[i][0] += 1
-                        if stagnation_array[i][0] > max_stagnation:
-                            stagnated_species.append(i)
+                        if stagnation_array[i][0] > max_stagnation and num_species > min_species:
                             print("species", i, "stagnated")
+                            stagnated_species.append(i)
+                            population_lost += len(population[i])
+                            num_species -= 1
                 
                 # delete stagnated species
-                population_lost = 0
-                for i in stagnated_species:
-                    num_species -= 1
-                    population_lost += len(population[i])
+                for i in reversed(stagnated_species):
                     del population[i]
                     del stagnation_array[i]
                     del elites[i]
@@ -210,8 +205,11 @@ if __name__ == "__main__":
                 # grow other species based on their fitness to keep total population the same
                 for _ in range(population_lost):
                     # choose a random sub population based on their population fitness
-                    sub_population = rng.choice(population, p=np.array(max_fitnesses)/sum(max_fitnesses))
-                    sub_population.append(None) # just a placeholder to keep track of their size
+                    np_mfs = np.array(max_fitnesses)
+                    np_mfs = np_mfs - min(np_mfs) # shift array to make min value 0 (all positive)
+                    p = np_mfs/sum(np_mfs) # normalize array to make sum(p) = 1
+                    sub_population = rng.choice(population, p=p)
+                    np.vstack((sub_population, sub_population[-1])) # sub_population[-1] is just a placeholder to keep track of sub pop size
 
 
                 # new population
@@ -221,6 +219,6 @@ if __name__ == "__main__":
                     population[i] = elites[i] + children
             
         print("winner:", winner)
-        pickle.dump(winner, open('winners/neuro-winner-e{}-r{}'.format(e, r), 'wb'))
+        pickle.dump(winner[0], open('winners/neuro-winner-e{}-r{}'.format(e, r), 'wb'))
 
     df.to_csv('neuro-results.csv', index=False)

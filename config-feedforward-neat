@@ -3,7 +3,7 @@
 [NEAT]
 fitness_criterion     = max
 fitness_threshold     = 99.9
-pop_size              = 100
+pop_size              = 50
 reset_on_extinction   = True
 
 [DefaultReproduction]
@@ -18,7 +18,7 @@ species_fitness_func = max
 # kill species if no improvement for this many gens
 max_stagnation       = 10
 # min num of species
-species_elitism      = 5
+species_elitism      = 3
 
 [DefaultGenome]
 feed_forward          = True

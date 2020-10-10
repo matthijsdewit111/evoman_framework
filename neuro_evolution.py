@@ -96,8 +96,8 @@ if __name__ == "__main__":
     max_stagnation = 10
     
     mutation_params = {
-        "mutation_rate": 0.1,
-        "mutation_power": 1.0,
+        "mutation_rate": 0.7,
+        "mutation_power": 0.5,
         "mutation_replace_rate": 0.1
     }
 
@@ -157,7 +157,7 @@ if __name__ == "__main__":
                 for i in range(num_species):
                     species_max_fitness = 0
                     sum_species_fitness = 0
-                    for j in range(len(population)):
+                    for j in range(len(population[i])):
                         fitness = generation_results[i][j]["fitness"]
                         if fitness > max_fitness:
                             max_fitness = fitness

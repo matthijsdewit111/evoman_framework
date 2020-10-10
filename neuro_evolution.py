@@ -188,7 +188,7 @@ if __name__ == "__main__":
                        stagnation_array[i][0] = 0
                     else:
                         stagnation_array[i][0] += 1
-                        if stagnation_array[i][0] > max_stagnation and num_species > min_species:
+                        if stagnation_array[i][0] > max_stagnation and np.argsort(max_fitnesses)[i] > min_species:
                             print("species", i, "stagnated")
                             stagnated_species.append(i)
                             population_lost += len(population[i])

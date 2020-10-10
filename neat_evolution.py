@@ -86,7 +86,7 @@ if __name__ == "__main__":
             p.add_reporter(stats)
             p.add_reporter(neat.Checkpointer(generation_interval=5, filename_prefix='checkpoints/neat-checkpoint-e{}-r{}'.format(e, r)))
 
-            winner = p.run(eval_genomes, 25)
+            winner = p.run(eval_genomes, 20)
             pickle.dump(winner, open('winners/neat-winner-e{}-r{}'.format(e, r), 'wb'))
 
     df.to_csv('neat-results.csv', index=False)

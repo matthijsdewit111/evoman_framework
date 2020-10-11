@@ -117,11 +117,13 @@ if __name__ == "__main__":
 
             # evaluate all individuals
             for g in range(max_generations):
+
+                print("GENERATION", g)
                 
                 generation_results = []
                 elites = []
                 parents = []
-                max_fitnesses = []
+                max_fitnesses = np.zeros(num_species)
 
                 for s, sub_population in enumerate(population):
                     species_generation_results = [get_fitness(i, s, individual, env) for i, individual in enumerate(sub_population)]
@@ -135,7 +137,7 @@ if __name__ == "__main__":
                     )
 
                     species_max_fitness = sorted_results[0]["fitness"]
-                    max_fitnesses.append(species_max_fitness)
+                    max_fitnesses[s] = species_max_fitness
                     if species_max_fitness > winner[1]:
                         winner_index = sorted_results[0]["individual_index"]
                         winner = [sub_population[winner_index], species_max_fitness]
@@ -170,25 +172,26 @@ if __name__ == "__main__":
                                 'metric': 'max',
                                 'gen': g,
                                 'run': r,
-                                'enemy': e
+                                'enemy_group': e
                                 },
                                 {'value': mean_fitness,
                                 'metric': 'mean',
                                 'gen': g,
                                 'run': r,
-                                'enemy': e
+                                'enemy_group': e
                                 }], ignore_index=True)
                 
                 # keep track of stagnation
                 stagnated_species = []
                 population_lost = 0
+                argsort = np.argsort(np.argsort(-max_fitnesses)) # double argsort is intented
                 for i in range(len(population)):
                     if stagnation_array[i][1] < max_fitnesses[i]:
                        stagnation_array[i][1] = max_fitnesses[i]
                        stagnation_array[i][0] = 0
                     else:
                         stagnation_array[i][0] += 1
-                        if stagnation_array[i][0] > max_stagnation and np.argsort(max_fitnesses)[i] > min_species:
+                        if stagnation_array[i][0] > max_stagnation and argsort[i] > min_species:
                             print("species", i, "stagnated")
                             stagnated_species.append(i)
                             population_lost += len(population[i])
@@ -200,14 +203,13 @@ if __name__ == "__main__":
                     del stagnation_array[i]
                     del elites[i]
                     del parents[i]
-                    del max_fitnesses[i]
+                    max_fitnesses = np.delete(max_fitnesses, i)
                 
                 # grow other species based on their fitness to keep total population the same
                 for _ in range(population_lost):
                     # choose a random sub population based on their population fitness
-                    np_mfs = np.array(max_fitnesses)
-                    np_mfs = np_mfs - min(np_mfs) # shift array to make min value 0 (all positive)
-                    p = np_mfs/sum(np_mfs) # normalize array to make sum(p) = 1
+                    max_fitnesses_shifted = max_fitnesses - min(max_fitnesses) # shift array to make min value 0 (all positive)
+                    p = max_fitnesses_shifted/sum(max_fitnesses_shifted) # normalize array to make sum(p) = 1
                     sub_population = rng.choice(population, p=p)
                     np.vstack((sub_population, sub_population[-1])) # sub_population[-1] is just a placeholder to keep track of sub pop size
 
@@ -218,7 +220,7 @@ if __name__ == "__main__":
                     children = generate_children(parents[i], num_children, mutation_params)
                     population[i] = elites[i] + children
             
-        print("winner:", winner)
-        pickle.dump(winner[0], open('winners/neuro-winner-e{}-r{}'.format(e, r), 'wb'))
+            print("winner:", winner)
+            pickle.dump(winner[0], open('winners/neuro-winner-e{}-r{}'.format(e, r), 'wb'))
 
     df.to_csv('neuro-results.csv', index=False)

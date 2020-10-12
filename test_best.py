@@ -29,9 +29,9 @@ if __name__ == "__main__":
 
     df = pd.DataFrame(columns=['enemy', 'EA', 'gain'])
 
-    determine_winners = False
-    winners_neat = [(9, 34.0), (1, 10.0)]
-    winners_neuro = [(2, 34.0), (3, 16.0)]
+    determine_winners = True
+    winners_neat = [(0, -990), (0, -999)]
+    winners_neuro = [(0, -999), (0, -999)]
 
     for e in range(2):
         print("e:", e)
@@ -58,10 +58,10 @@ if __name__ == "__main__":
                     _, pe_neuro, ee_neuro, _ = env_neuro.play(pcont=genome_neuro)
                     total_gain_neuro += pe_neuro - ee_neuro
 
-                    if winners_neat[e][1] < total_gain_neat:
-                        winners_neat[e] = (r, total_gain_neat)
-                    if winners_neuro[e][1] < total_gain_neuro:
-                        winners_neuro[e] = (r, total_gain_neuro)
+                if winners_neat[e][1] < total_gain_neat:
+                    winners_neat[e] = (r, total_gain_neat)
+                if winners_neuro[e][1] < total_gain_neuro:
+                    winners_neuro[e] = (r, total_gain_neuro)
 
         print(winners_neat)
         print(winners_neuro)
